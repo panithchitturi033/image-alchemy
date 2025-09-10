@@ -1,0 +1,5 @@
+{
+  "name": "ImageAlchemy",
+  "description": "A visually stunning AI application for text-to-image generation and image editing, powered by the Gemini API. Experience the magic of creating and transforming images with a simple prompt.",
+  "requestFramePermissions": []
+}

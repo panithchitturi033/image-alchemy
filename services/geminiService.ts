@@ -22,21 +22,30 @@ export const generateImage = async (
   const fullPrompt = negativePrompt ? `${prompt}, negative prompt: ${negativePrompt}` : prompt;
   
   try {
-    const response = await ai.models.generateImages({
-      model: 'imagen-4.0-generate-001',
-      prompt: fullPrompt,
+    // Using gemini-2.5-flash-image-preview for text-to-image generation as requested.
+    // The aspect ratio parameter is kept for UI compatibility but may not be supported by this model for generation.
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image-preview',
+      contents: {
+          parts: [
+              {
+                  text: fullPrompt,
+              },
+          ],
+      },
       config: {
-        numberOfImages: 1,
-        outputMimeType: 'image/png',
-        aspectRatio,
+          responseModalities: [Modality.IMAGE, Modality.TEXT],
       },
     });
 
-    if (response.generatedImages && response.generatedImages.length > 0) {
-      return response.generatedImages[0].image.imageBytes;
-    } else {
-      throw new Error("Image generation failed, no images returned.");
+    for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+            return part.inlineData.data;
+        }
     }
+
+    throw new Error("Image generation failed, no image was returned in the response.");
+
   } catch (error) {
     console.error("Error generating image:", error);
     throw new Error("Failed to generate image. Please check the console for details.");
